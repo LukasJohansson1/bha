@@ -21,6 +21,20 @@ async function getUsers() {
   }
 }
 
+async function createUser(username, password) {
+  try {
+    await connection.promise().query("INSERT INTO users (username, password) VALUES (?, ?)", [username, password]);
+  } catch (error) {
+    throw error;
+  }
+}
+
+module.exports = {
+  getUsers: getUsers,
+  createUser: createUser
+};
+
+
 module.exports = {
   getUsers: getUsers,
 };
