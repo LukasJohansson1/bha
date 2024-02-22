@@ -1,0 +1,28 @@
+
+{{!-- 
+Den här mallen förutsätter att man skickat in ett objekt som ser ut så här:
+ 
+ {
+  userId: "ett id",
+  posts: [
+    {
+      heading: "En rubrik",
+      body: "En text"
+      ...
+    },
+    ...
+  ]
+ }
+
+ --}}
+<h1>Posts för användare {{userId}}</h1>
+  {{#each posts}}
+    <div>
+  {{!-- inne i loopen använder man "this" för att komma åt det aktuella elementet i arrayen --}}
+      <h2>{{this.heading}}</h2> 
+      <div>{{this.body}}</div>
+    </div>
+  {{!-- else körs om posts är tom, alltså om användaren inte postat något --}}
+  {{else}}
+    Den här användaren har inte postat något.
+  {{/each}}
