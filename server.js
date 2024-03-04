@@ -14,14 +14,20 @@ app.set("views", "./views");
 
 
 app.get("/", (req, res) => {
-  res.render("login");
+  res.render("welcome");
 });
 
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 });
+app.get("/login", (req, res) => {
+  res.render("login");
+});
 
+app.get("/welcome", (req, res) => {
+  res.render("welcome");
+});
 
 app.get("/register", (req, res) => {
   res.render("register");
