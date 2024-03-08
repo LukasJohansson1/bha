@@ -33,8 +33,3 @@ module.exports = {
   getUsers: getUsers,
   createUser: createUser
 };
-
-
-module.exports = {
-  getUsers: getUsers,
-};

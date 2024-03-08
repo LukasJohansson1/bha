@@ -7,6 +7,9 @@
 </head>
 <body>
     <h2>Register</h2>
+    {{#if success}}
+        <p style="color: green;">{{success}}</p> 
+    {{/if}}
     <form action="/register" method="POST">
         Username:<br>
         <input type="text" name="username"><br>
