@@ -4,20 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
+    <script>
+        function showError(message) {
+            alert(message);
+        }
+    </script>
 </head>
 <body>
-    <h2>Register</h2>
-    {{#if success}}
-        <p style="color: green;">{{success}}</p> 
-    {{/if}}
+    <h1>Register</h1>
     <form action="/register" method="POST">
-        Username:<br>
-        <input type="text" name="username"><br>
-        Password:<br>
-        <input type="password" name="password"><br><br>
-        <input type="submit" value="Register">
+        <input type="text" name="username" placeholder="Username">
+        <input type="password" name="password" placeholder="Password">
+        <button type="submit">Register</button>
     </form>
     <p>Already have an account? <a href="/login">Login</a></p>
     <button><a href="/welcome">Home page</a></button>
+    {{#if error}}
+        <script>
+            showError("{{error}}");
+        </script>
+    {{/if}}
 </body>
 </html>

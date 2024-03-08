@@ -12,11 +12,12 @@ app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
 app.set("views", "./views");
 
+app.get("/home", (req, res) => {
+  res.render("home")});
 
 app.get("/", (req, res) => {
   res.render("welcome");
 });
-
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
@@ -43,7 +44,7 @@ app.post("/register", async (req, res) => {
       res.render("register", { error: "Username already exists. Please choose a different username" });
     } else {
       await createUser(username, password);
-      res.redirect("/main");
+      res.redirect("/home");
     }
   } catch (error) {
     console.error(error);
@@ -58,7 +59,7 @@ app.post("/login", async (req, res) => {
     const users = await getUsers();
     const user = users.find(user => user.username === username && user.password === password); 
     if (user) {
-      res.redirect("/main");
+      res.redirect("/home");
     } else {
       res.render("login", { error: "Invalid username or password" });
     }
