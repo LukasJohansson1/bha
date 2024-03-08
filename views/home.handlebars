@@ -1,17 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ChattaOasen</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChattaOasen - Hem</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    {{!-- {{{body}}} är en platshållare för innehåll som ska in i den här mallen/vyn --}}
-    {{{body}}}
-<p>oekoewkfokof</p>
-  <footer>
-  </footer>
+    <header>
+        <h1>Välkommen till ChatOasen</h1>
+        <p>Hej, {{username}}! Du är nu inloggad.</p>
+    </header>
+    <main>
+        <h2>Dina meddelanden</h2>
+        <div id="message-container">
+            {{#each messages}}
+                <div class="message">
+                    <p><strong>{{this.sender}}</strong>: {{this.text}}</p>
+                    <small>{{this.timestamp}}</small>
+                </div>
+            {{/each}}
+        </div>
+        <form id="message-form" action="/send-message" method="POST">
+            <textarea name="message" placeholder="Skriv ditt meddelande här" required></textarea>
+            <button type="submit">Skicka</button>
+        </form>
+    </main>
+    <footer>
+        <p>Skapad av ChatOasen Team - {{year}}</p>
+    </footer>
 </body>
 </html>
