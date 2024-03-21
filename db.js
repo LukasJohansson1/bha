@@ -32,7 +32,8 @@ async function createUser(username, password, hashpassword) {
   } catch (error) {
     throw error;
   }
-}
+} 
+// Vet att du inte ska spara lösenordet icke hashat i databasen, kommer annars glömma dem.
 
 
 
