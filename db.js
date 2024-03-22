@@ -32,12 +32,18 @@ async function createUser(username, password, hashpassword) {
   } catch (error) {
     throw error;
   }
-} 
-// Vet att du inte ska spara lösenordet icke hashat i databasen, kommer annars glömma dem.
+}
 
-
+async function savePostToDatabase(message, userId, connection) {
+  try {
+    await connection.promise().query("INSERT INTO posts (message, user_id) VALUES (?, ?)", [message, userId]);
+  } catch (error) {
+    throw error;
+  }
+}
 
 module.exports = {
   getUsers: getUsers,
-  createUser: createUser
+  createUser: createUser,
+  savePostToDatabase: savePostToDatabase
 };
