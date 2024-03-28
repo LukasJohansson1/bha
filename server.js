@@ -44,7 +44,9 @@ app.get("/register", (req, res) => {
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
   try {
-    const hashedPassword = await bcrypt.hash(password, 10); 
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt); 
     await createUser(username, password, hashedPassword); 
     res.redirect("/home");
   } catch (error) {
