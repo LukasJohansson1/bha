@@ -34,9 +34,9 @@ async function createUser(username, password, hashpassword) {
   }
 }
 
-async function savePostToDatabase(message, userId, connection) {
+async function savePostToDatabase(message, userId) {
   try {
-    await connection.promise().query("INSERT INTO posts (message, user_id) VALUES (?, ?)", [message, userId]);
+    await connection.promise().query("INSERT INTO posts (message, userId) VALUES (?, ?)", [message, userId]);
   } catch (error) {
     throw error;
   }

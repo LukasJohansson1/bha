@@ -1,28 +1,33 @@
 const express = require("express");
-const session = require("express-session");
+const cookieParser = require("cookie-parser");
 const { engine } = require("express-handlebars");
 const bcrypt = require('bcrypt');
+const jwt = require("jsonwebtoken");
 const { getUsers, createUser, savePostToDatabase } = require('./db');
 
 const app = express();
 const port = 3000;
 
-
-app.use(session({
-  secret: 'hemlig nyckel',
-  resave: false,
-  saveUninitialized: false
-}));
-
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true })); 
+app.use(cookieParser()); // Add cookie-parser middleware
 
 app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
 app.set("views", "./views");
 
 app.get("/home", (req, res) => {
-  res.render("home", { user: req.session.user });
+  const token = req.cookies.token;
+  if (!token) {
+    return res.redirect("/login");
+  }
+  try {
+    const decoded = jwt.verify(token, "your_secret_key");
+    res.render("home", { user: decoded });
+  } catch (error) {
+    console.error(error);
+    res.redirect("/login");
+  }
 });
 
 app.get("/", (req, res) => {
@@ -41,17 +46,20 @@ app.get("/register", (req, res) => {
   res.render("register");
 });
 
+app.get("/posts", (req, res) =>{
+  res.render("posts")
+});
+
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
   try {
-
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt); 
     await createUser(username, password, hashedPassword); 
     res.redirect("/home");
   } catch (error) {
     console.error(error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send("User already exsist");
   }
 });
 
@@ -63,7 +71,8 @@ app.post("/login", async (req, res) => {
     if (user) {
       const passwordMatch = await bcrypt.compare(password, user.hashpassword); 
       if (passwordMatch) {
-        req.session.user = user;
+        const token = jwt.sign({ username: user.username, id: user.id }, "your_secret_key");
+        res.cookie("token", token);
         res.redirect("/home");
       } else {
         res.render("login", { error: "Invalid username or password" });
@@ -79,20 +88,42 @@ app.post("/login", async (req, res) => {
 
 app.post("/send-message", async (req, res) => {
   const message = req.body.message;
-  const user = req.session.user;
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(401).send("Unauthorized");
+  }
 
   try {
-    if (user && user.id) {
-      await savePostToDatabase(message, user.id);
-      res.redirect("/home");
-    } else {
-      res.status(401).send("Unauthorized");
-    }
+    const decoded = jwt.verify(token, "your_secret_key");
+    await savePostToDatabase(message, decoded.id);
+    res.redirect("/home");
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");
   }
 });
+
+async function fetchPostsByUserId(userId) {
+  try {
+    const [rows] = await connection.promise().query("SELECT * FROM posts WHERE userId = ?", [userId]);
+    return rows;
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    throw error;
+  }
+}
+
+app.get("/user/:userId/posts", async (req, res) => {
+  const userId = req.params.userId;
+  try {
+    const posts = await fetchPostsByUserId(userId);
+    res.render("posts", { userId, posts });
+  } catch (error) {
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
