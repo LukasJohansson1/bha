@@ -3,7 +3,7 @@ const cookieParser = require("cookie-parser");
 const { engine } = require("express-handlebars");
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
-const { getUsers, createUser, savePostToDatabase } = require('./db');
+const { getUsers, createUser, savePostToDatabase, connection , fetchPostsByUserId, get} = require('./db');
 
 const app = express();
 const port = 3000;
@@ -16,14 +16,15 @@ app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
 app.set("views", "./views");
 
-app.get("/home", (req, res) => {
+app.get("/home", async (req, res) => {
   const token = req.cookies.token;
   if (!token) {
     return res.redirect("/login");
   }
   try {
     const decoded = jwt.verify(token, "your_secret_key");
-    res.render("home", { user: decoded });
+    const posts = await fetchLatestPosts();
+    res.render("home", { user: decoded, messages: posts });
   } catch (error) {
     console.error(error);
     res.redirect("/login");
@@ -96,7 +97,8 @@ app.post("/send-message", async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, "your_secret_key");
-    await savePostToDatabase(message, decoded.id);
+    const username = await getUsernameById(decoded.id);
+    await savePostToDatabase(message, decoded.id, username);
     res.redirect("/home");
   } catch (error) {
     console.error(error);
@@ -104,22 +106,34 @@ app.post("/send-message", async (req, res) => {
   }
 });
 
-async function fetchPostsByUserId(userId) {
-  try {
-    const [rows] = await connection.promise().query("SELECT * FROM posts WHERE userId = ?", [userId]);
-    return rows;
-  } catch (error) {
-    console.error("Error fetching posts:", error);
-    throw error;
-  }
+
+async function fetchLatestPosts(limit) {
+  return new Promise((resolve, reject) => {
+    let query = "SELECT * FROM posts ORDER BY timestamp DESC";
+    if (limit) {
+      query += " LIMIT ?";
+    }
+    connection.query(query, limit, (error, results) => {
+      if (error) {
+        console.error("Error fetching latest posts:", error);
+        reject(error);
+      } else {
+        resolve(results);
+      }
+    });
+  });
 }
+
+
 
 app.get("/user/:userId/posts", async (req, res) => {
   const userId = req.params.userId;
   try {
     const posts = await fetchPostsByUserId(userId);
-    res.render("posts", { userId, posts });
+    const username = await getUsernameById(userId); 
+    res.render("posts", { username, posts });
   } catch (error) {
+    console.error(error);
     res.status(500).send("Internal Server Error");
   }
 });

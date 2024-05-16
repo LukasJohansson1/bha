@@ -13,11 +13,11 @@
         <p>Hej! Du är nu inloggad.</p>
     </header>
     <main>
-        <h2>Dina meddelanden</h2>
+        <h2>Senaste postsen</h2>
         <div id="message-container">
             {{#each messages}}
                 <div class="message">
-                    <p><strong>{{this.sender}}</strong>: {{this.text}}</p>
+                    <p><strong>{{this.username}}</strong>: {{this.message}}</p>
                     <small>{{this.timestamp}}</small>
                 </div>
             {{/each}}
@@ -29,7 +29,7 @@
         <button><a href="/posts">Se dina posts</a></button>
     </main>
     <footer>
-        <p>Skapad av ChatOasen Team - 1994</p>
+        <p>Skapad av ChatOasen Team - 2077</p>
     </footer>
 </body>
 </html>

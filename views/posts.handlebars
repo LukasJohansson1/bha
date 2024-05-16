@@ -1,28 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dina posts</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Dina posts för {{username}}</h1>
+    <button><a href="/home">Posta</a></button>
 
-{{!-- 
-Den här mallen förutsätter att man skickat in ett objekt som ser ut så här:
- 
- {
-  userId: "ett id",
-  posts: [
-    {
-      heading: "En rubrik",
-      body: "En text"
-      ...
-    },
-    ...
-  ]
- }
-
- --}}
-<h1>Posts för användare {{userId}}</h1>
-  {{#each posts}}
-    <div>
-  {{!-- inne i loopen använder man "this" för att komma åt det aktuella elementet i arrayen --}}
-      <h2>{{this.heading}}</h2> 
-      <div>{{this.body}}</div>
-    </div>
-  {{!-- else körs om posts är tom, alltså om användaren inte postat något --}}
-  {{else}}
-    Den här användaren har inte postat något.
-  {{/each}}
+    {{#if posts.length}}
+        {{#each posts}}
+            <div>
+                {{!-- Inne i loopen använder man "this" för att komma åt det aktuella elementet i arrayen --}}
+                <h2>{{this.heading}}</h2> 
+                <div>{{this.body}}</div>
+            </div>
+        {{/each}}
+    {{else}}
+        <p>Du har inte postat något än.</p>
+    {{/if}}
+</body>
+</html>

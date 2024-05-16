@@ -34,16 +34,39 @@ async function createUser(username, password, hashpassword) {
   }
 }
 
-async function savePostToDatabase(message, userId) {
+async function savePostToDatabase(message, userId, username) {
   try {
-    await connection.promise().query("INSERT INTO posts (message, userId) VALUES (?, ?)", [message, userId]);
+    await connection.promise().query("INSERT INTO posts (message, userId, username) VALUES (?, ?, ?)", [message, userId, username]);
   } catch (error) {
     throw error;
   }
 }
 
+async function fetchPostsByUserId(userId) {
+  try {
+    const [rows] = await connection.promise().query("SELECT * FROM posts WHERE userId = ?", [userId]);
+    return rows;
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    throw error;
+  }
+}
+
+async function getUsernameById(userId) {
+  try {
+    const [user] = await connection.promise().query("SELECT username FROM users WHERE id = ?", [userId]);
+    return user[0].username;
+  } catch (error) {
+    throw error;
+  }
+}
+
+
 module.exports = {
   getUsers: getUsers,
   createUser: createUser,
-  savePostToDatabase: savePostToDatabase
+  savePostToDatabase: savePostToDatabase,
+  connection: connection,
+  fetchPostsByUserId: fetchPostsByUserId,
+  getUsernameById: getUsernameById,
 };
