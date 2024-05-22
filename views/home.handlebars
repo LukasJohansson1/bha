@@ -19,6 +19,12 @@
                 <div class="message">
                     <p><strong>{{this.username}}</strong>: {{this.message}}</p>
                     <small>{{this.timestamp}}</small>
+                    {{#if (eq this.userId ../user.id)}}
+                        <form action="/delete-post" method="POST" style="display:inline;">
+                            <input type="hidden" name="postId" value="{{this.id}}">
+                            <button type="submit">Radera</button>
+                        </form>
+                    {{/if}}
                 </div>
             {{/each}}
         </div>
@@ -26,7 +32,9 @@
             <textarea name="message" placeholder="Skriv ditt meddelande här" required></textarea>
             <button type="submit">Skicka</button>
         </form>
-        <button><a href="/posts">Se dina posts</a></button>
+        <br>
+        <button><a href="/user/{{user.id}}/posts">See Your Posts</a></button>
+        <button><a href="/update">Uppdatera ditt lösenord</a></button>
     </main>
     <footer>
         <p>Skapad av ChatOasen Team - 2077</p>

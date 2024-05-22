@@ -8,15 +8,18 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Dina posts för {{username}}</h1>
+    <h1>Posts från {{username}}</h1>
     <button><a href="/home">Posta</a></button>
 
     {{#if posts.length}}
         {{#each posts}}
             <div>
-                {{!-- Inne i loopen använder man "this" för att komma åt det aktuella elementet i arrayen --}}
-                <h2>{{this.heading}}</h2> 
-                <div>{{this.body}}</div>
+                <h2>{{this.message}}</h2> 
+                <div>{{this.timestamp}}</div>
+                <form action="/delete-post" method="POST" style="display:inline;">
+                    <input type="hidden" name="postId" value="{{this.id}}">
+                    <button type="submit">Radera</button>
+                </form>
             </div>
         {{/each}}
     {{else}}
