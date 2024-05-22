@@ -3,7 +3,8 @@ const cookieParser = require("cookie-parser");
 const { engine } = require("express-handlebars");
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
-const { getUsers, createUser, savePostToDatabase, connection, fetchPostsByUserId, getUsernameById, fetchLatestPosts, updateUserPassword, deletePostByIdAndUserId } = require('./db');
+const {getUsers, createUser, savePostToDatabase, connection, fetchPostsByUserId, 
+getUsernameById, fetchLatestPosts, updateUserPassword, deletePostByIdAndUserId } = require('./db');
 
 const app = express();
 const port = 3000;
@@ -19,21 +20,6 @@ app.engine("handlebars", engine({
 }));
 app.set("view engine", "handlebars");
 app.set("views", "./views");
-
-app.get("/home", async (req, res) => {
-  const token = req.cookies.token;
-  if (!token) {
-    return res.redirect("/login");
-  }
-  try {
-    const decoded = jwt.verify(token, "your_secret_key");
-    const posts = await fetchLatestPosts();
-    res.render("home", { user: decoded, messages: posts });
-  } catch (error) {
-    console.error(error);
-    res.redirect("/login");
-  }
-});
 
 app.get("/", (req, res) => {
   res.render("welcome");
@@ -58,6 +44,22 @@ app.get("/posts", (req, res) => {
 app.get("/update", (req, res) => {
   res.render("update");
 });
+
+app.get("/home", async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.redirect("/login");
+  }
+  try {
+    const decoded = jwt.verify(token, "your_secret_key");
+    const posts = await fetchLatestPosts(8);
+    res.render("home", { user: decoded, messages: posts });
+  } catch (error) {
+    console.error(error);
+    res.redirect("/login");
+  }
+});
+
 
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
@@ -159,6 +161,7 @@ app.post("/update", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
 
 app.post("/delete-post", async (req, res) => {
   const token = req.cookies.token;

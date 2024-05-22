@@ -63,22 +63,16 @@ async function getUsernameById(userId) {
   }
 }
 
-async function fetchLatestPosts(limit) {
-  return new Promise((resolve, reject) => {
-    let query = "SELECT * FROM posts ORDER BY timestamp DESC";
-    if (limit) {
-      query += " LIMIT ?";
-    }
-    connection.query(query, limit, (error, results) => {
-      if (error) {
-        console.error("Error fetching latest posts:", error);
-        reject(error);
-      } else {
-        resolve(results);
-      }
-    });
-  });
+async function fetchLatestPosts(limit = 8) {
+  try {
+    const [rows] = await connection.promise().query("SELECT * FROM posts ORDER BY timestamp DESC LIMIT ?", [limit]);
+    return rows;
+  } catch (error) {
+    console.error("Error fetching latest posts:", error);
+    throw error;
+  }
 }
+
 
 async function updateUserPassword(userId, newPasswordHash) {
   try {
