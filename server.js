@@ -3,7 +3,7 @@ const cookieParser = require("cookie-parser");
 const { engine } = require("express-handlebars");
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
-const {getUsers, createUser, savePostToDatabase, connection, fetchPostsByUserId, 
+const { getUsers, createUser, savePostToDatabase, connection, fetchPostsByUserId, 
 getUsernameById, fetchLatestPosts, updateUserPassword, deletePostByIdAndUserId } = require('./db');
 
 const app = express();
@@ -60,13 +60,16 @@ app.get("/home", async (req, res) => {
   }
 });
 
-
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
   try {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     await createUser(username, password, hashedPassword);
+    const users = await getUsers();
+    const user = users.find(user => user.username === username);
+    const token = jwt.sign({ username: user.username, id: user.id }, "your_secret_key");
+    res.cookie("token", token);
     res.redirect("/home");
   } catch (error) {
     console.error(error);
@@ -162,7 +165,6 @@ app.post("/update", async (req, res) => {
   }
 });
 
-
 app.post("/delete-post", async (req, res) => {
   const token = req.cookies.token;
   const { postId } = req.body;
@@ -184,6 +186,11 @@ app.post("/delete-post", async (req, res) => {
     console.error(error);
     res.status(500).send("Internal Server Error");
   }
+});
+
+app.get("/logout", (req, res) => {
+  res.clearCookie("token");
+  res.redirect("/login");
 });
 
 
