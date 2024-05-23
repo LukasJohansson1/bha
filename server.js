@@ -65,7 +65,7 @@ app.post("/register", async (req, res) => {
   try {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    await createUser(username, password, hashedPassword);
+    await createUser(username, hashedPassword);
     const users = await getUsers();
     const user = users.find(user => user.username === username);
     const token = jwt.sign({ username: user.username, id: user.id }, "your_secret_key");
@@ -76,6 +76,7 @@ app.post("/register", async (req, res) => {
     res.status(500).send("User already exists");
   }
 });
+
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
@@ -192,7 +193,6 @@ app.get("/logout", (req, res) => {
   res.clearCookie("token");
   res.redirect("/login");
 });
-
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

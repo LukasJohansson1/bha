@@ -21,13 +21,13 @@ async function getUsers() {
   }
 }
 
-async function createUser(username, password, hashpassword) {
+async function createUser(username, hashpassword) {
   try {
     const [existingUsers] = await connection.promise().query("SELECT * FROM users WHERE username = ?", [username]);
     if (existingUsers.length > 0) {
       throw new Error("Username already exists");
     } else {
-      await connection.promise().query("INSERT INTO users (username, password, hashpassword) VALUES (?, ?, ?)", [username, password, hashpassword]);
+      await connection.promise().query("INSERT INTO users (username, hashpassword) VALUES (?, ?)", [username, hashpassword]);
     }
   } catch (error) {
     throw error;
