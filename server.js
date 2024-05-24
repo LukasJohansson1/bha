@@ -4,8 +4,8 @@ const { engine } = require("express-handlebars");
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const { getUsers, createUser, savePostToDatabase, connection, fetchPostsByUserId, 
-getUsernameById, fetchLatestPosts, updateUserPassword, deletePostByIdAndUserId, likePost, 
-unlikePost, fetchPostsWithLikes } = require('./db');
+getUsernameById, updateUserPassword, deletePostByIdAndUserId, likePost, 
+unlikePost, fetchPosts } = require('./db');
 
 const app = express();
 const port = 3000;
@@ -54,7 +54,7 @@ app.get("/home", async (req, res) => {
   }
   try {
     const decoded = jwt.verify(token, "your_secret_key");
-    const posts = await fetchPostsWithLikes(8);
+    const posts = await fetchPosts(8);
     res.render("home", { user: decoded, messages: posts });
   } catch (error) {
     console.error(error);

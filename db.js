@@ -72,16 +72,6 @@ async function getUsernameById(userId) {
   }
 }
 
-async function fetchLatestPosts(limit = 8) {
-  try {
-    const [rows] = await connection.promise().query("SELECT * FROM posts ORDER BY timestamp DESC LIMIT ?", [limit]);
-    return rows;
-  } catch (error) {
-    console.error("Error fetching latest posts:", error);
-    return null;
-  }
-}
-
 async function updateUserPassword(userId, newPasswordHash) {
   try {
     await connection.promise().query("UPDATE users SET hashpassword = ? WHERE id = ?", [newPasswordHash, userId]);
@@ -134,7 +124,7 @@ async function getLikesCount(postId) {
   }
 }
 
-async function fetchPostsWithLikes(limit = 8) {
+async function fetchPosts(limit = 8) {
   try {
     const [posts] = await connection.promise().query("SELECT * FROM posts ORDER BY timestamp DESC LIMIT ?", [limit]);
     for (const post of posts) {
@@ -155,11 +145,10 @@ module.exports = {
   connection,
   fetchPostsByUserId,
   getUsernameById,
-  fetchLatestPosts,
   updateUserPassword,
   deletePostByIdAndUserId,
   likePost,
   unlikePost,
   getLikesCount,
-  fetchPostsWithLikes
+  fetchPosts
 };
