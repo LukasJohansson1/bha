@@ -4,7 +4,8 @@ const { engine } = require("express-handlebars");
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const { getUsers, createUser, savePostToDatabase, connection, fetchPostsByUserId, 
-getUsernameById, fetchLatestPosts, updateUserPassword, deletePostByIdAndUserId } = require('./db');
+getUsernameById, fetchLatestPosts, updateUserPassword, deletePostByIdAndUserId, likePost, 
+unlikePost, fetchPostsWithLikes } = require('./db');
 
 const app = express();
 const port = 3000;
@@ -18,6 +19,7 @@ app.engine("handlebars", engine({
     eq: (a, b) => a === b
   }
 }));
+
 app.set("view engine", "handlebars");
 app.set("views", "./views");
 
@@ -52,7 +54,7 @@ app.get("/home", async (req, res) => {
   }
   try {
     const decoded = jwt.verify(token, "your_secret_key");
-    const posts = await fetchLatestPosts(8);
+    const posts = await fetchPostsWithLikes(8);
     res.render("home", { user: decoded, messages: posts });
   } catch (error) {
     console.error(error);
@@ -65,7 +67,10 @@ app.post("/register", async (req, res) => {
   try {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    await createUser(username, hashedPassword);
+    const result = await createUser(username, hashedPassword);
+    if (result === "Username already exists") {
+      return res.status(400).send("User already exists");
+    }
     const users = await getUsers();
     const user = users.find(user => user.username === username);
     const token = jwt.sign({ username: user.username, id: user.id }, "your_secret_key");
@@ -73,10 +78,9 @@ app.post("/register", async (req, res) => {
     res.redirect("/home");
   } catch (error) {
     console.error(error);
-    res.status(500).send("User already exists");
+    res.status(500).send("Internal Server Error");
   }
 });
-
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
@@ -122,6 +126,11 @@ app.post("/send-message", async (req, res) => {
 
 app.get("/user/:userId/posts", async (req, res) => {
   const userId = req.params.userId;
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(401).send("Unauthorized");
+  }
   try {
     const posts = await fetchPostsByUserId(userId);
     const username = await getUsernameById(userId);
@@ -182,6 +191,50 @@ app.post("/delete-post", async (req, res) => {
       res.redirect("back");  
     } else {
       res.status(403).send("You are not allowed to delete this post");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status (500).send("Internal Server Error");
+  }
+});
+
+app.post("/like-post", async (req, res) => {
+  const token = req.cookies.token;
+  const { postId } = req.body;
+
+  if (!token) {
+    return res.status(401).send("Unauthorized");
+  }
+
+  try {
+    const decoded = jwt.verify(token, "your_secret_key");
+    const result = await likePost(decoded.id, postId);
+    if (result) {
+      res.redirect("back");
+    } else {
+      res.status(500).send("Could not like the post");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+app.post("/unlike-post", async (req, res) => {
+  const token = req.cookies.token;
+  const { postId } = req.body;
+
+  if (!token) {
+    return res.status(401).send("Unauthorized");
+  }
+
+  try {
+    const decoded = jwt.verify(token, "your_secret_key");
+    const result = await unlikePost(decoded.id, postId);
+    if (result) {
+      res.redirect("back");
+    } else {
+      res.status(500).send("Could not unlike the post");
     }
   } catch (error) {
     console.error(error);

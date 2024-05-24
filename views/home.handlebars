@@ -19,6 +19,15 @@
                 <div class="message">
                     <p><strong>{{this.username}}</strong>: {{this.message}}</p>
                     <small>{{this.timestamp}}</small>
+                    <p>Likes: {{this.likesCount}}</p>
+                    <form action="/like-post" method="POST" style="display:inline;">
+                        <input type="hidden" name="postId" value="{{this.id}}">
+                        <button type="submit">Like</button>
+                    </form>
+                    <form action="/unlike-post" method="POST" style="display:inline;">
+                        <input type="hidden" name="postId" value="{{this.id}}">
+                        <button type="submit">Unlike</button>
+                    </form>
                     {{#if (eq this.userId ../user.id)}}
                         <form action="/delete-post" method="POST" style="display:inline;">
                             <input type="hidden" name="postId" value="{{this.id}}">
